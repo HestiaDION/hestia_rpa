@@ -5,3 +5,4 @@ Flask
 pymongo
 flasgger
 python-dateutil
+logging

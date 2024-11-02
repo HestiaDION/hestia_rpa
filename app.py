@@ -1,20 +1,32 @@
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flasgger import Swagger
+import logging
+from os import getenv
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 Swagger(app)
 
+# Configuração de logging
+logging.basicConfig(
+    filename='api-mongo_log.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
 # Configuração de conexão com o MongoDB
-client = MongoClient("mongodb+srv://aed_hestia:gYeeRwGKnAFge6tC@banco-hestia.tp5sk.mongodb.net/?retryWrites=true&w=majority")
-db = client['db-hestia']  # Seleciona o banco de dados
-collection = db['info_user']  # Seleciona a coleção 'info_user'
+client = MongoClient(getenv('URI_MONGODB'))
+db = client[getenv('MONGO_DBNAME')]
+collection = db[getenv('MONGO_COLLECTION')]
 
 # Rota para expor a senha através do email
 @app.route('/get-password', methods=['POST'])
 def get_password():
     """
-    Expor a senha do usuário através do email
+    Expor a senha do usio através do email
     ---
     tags:
       - User
@@ -23,7 +35,7 @@ def get_password():
         in: body
         type: string
         required: true
-        description: O email do usuário para obter a senha
+        description: O email do usio para obter a senha
         schema:
           type: object
           properties:
@@ -32,7 +44,7 @@ def get_password():
               example: "jose@gmail.com"
     responses:
       200:
-        description: Senha do usuário
+        description: Senha do usio
         schema:
           type: object
           properties:
@@ -48,38 +60,35 @@ def get_password():
               type: string
               example: "Email é obrigatório"
       404:
-        description: Usuário não encontrado
+        description: Usio não encontrado
         schema:
           type: object
           properties:
             error:
               type: string
-              example: "Usuário não encontrado"
+              example: "Usio não encontrado"
     """
-    # Obtém o parâmetro 'email' do corpo da requisição
     data = request.get_json()
     if not data or 'email' not in data:
-        print("[ERROR] Email is missing in the request")
+        logging.error("Email is missing in the request for /get-password")
         return jsonify({'error': 'Email é obrigatório'}), 400
     
     email = data['email']
-    print(f"[DEBUG] Received request for /get-password with email: {email}")
+    logging.info(f"Received request for /get-password with email: {email}")
     
-    # Procura o usuário na coleção pelo email
     user = collection.find_one({'email': email})
     if not user:
-        print(f"[ERROR] No user found with email: {email}")
-        return jsonify({'error': 'Usuário não encontrado'}), 404
+        logging.error(f"No user found with email: {email}")
+        return jsonify({'error': 'Usio não encontrado'}), 404
     
-    # Retorna a senha do usuário encontrado
-    print(f"[DEBUG] User found: {user}")
+    logging.info(f"User found for email {email}")
     return jsonify({'senha': user['senha']})
 
 # Rota para expor a foto através do email
 @app.route('/get-photo', methods=['POST'])
 def get_photo():
     """
-    Expor a foto do usuário através do email
+    Expor a foto do usio através do email
     ---
     tags:
       - User
@@ -88,7 +97,7 @@ def get_photo():
         in: body
         type: string
         required: true
-        description: O email do usuário para obter a foto
+        description: O email do usio para obter a foto
         schema:
           type: object
           properties:
@@ -97,7 +106,7 @@ def get_photo():
               example: "jose@gmail.com"
     responses:
       200:
-        description: URL da foto do usuário
+        description: URL da foto do usio
         schema:
           type: object
           properties:
@@ -113,34 +122,30 @@ def get_photo():
               type: string
               example: "Email é obrigatório"
       404:
-        description: Usuário não encontrado
+        description: Usio não encontrado
         schema:
           type: object
           properties:
             error:
               type: string
-              example: "Usuário não encontrado"
+              example: "Usio não encontrado"
     """
-    # Obtém o parâmetro 'email' do corpo da requisição
     data = request.get_json()
     if not data or 'email' not in data:
-        print("[ERROR] Email is missing in the request")
+        logging.error("Email is missing in the request for /get-photo")
         return jsonify({'error': 'Email é obrigatório'}), 400
     
     email = data['email']
-    print(f"[DEBUG] Received request for /get-photo with email: {email}")
+    logging.info(f"Received request for /get-photo with email: {email}")
     
-    # Procura o usuário na coleção pelo email
     user = collection.find_one({'email': email})
     if not user:
-        print(f"[ERROR] No user found with email: {email}")
-        return jsonify({'error': 'Usuário não encontrado'}), 404
+        logging.error(f"No user found with email: {email}")
+        return jsonify({'error': 'Usio não encontrado'}), 404
     
-    # Retorna a URL da foto do usuário encontrado
-    print(f"[DEBUG] User found: {user}")
+    logging.info(f"User found for email {email}")
     return jsonify({'urlFoto': user['urlFoto']})
 
 if __name__ == '__main__':
-    # Mensagem indicando que a aplicação está sendo iniciada
-    print("[INFO] Starting Flask application")
+    logging.info("Starting Flask application")
     app.run(debug=True, use_reloader=False)
