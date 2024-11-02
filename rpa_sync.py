@@ -1,18 +1,25 @@
 # Importacoes
 import psycopg2
-import requests
 import logging
 from os import getenv
 from dotenv import load_dotenv
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from random import randint
+from pymongo import MongoClient
+
 # Configuracao do logging
 logging.basicConfig(
     filename='rpa_log.log',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+load_dotenv()
+
+client = MongoClient(getenv('URI_MONGODB'))
+db = client[getenv('MONGO_DBNAME')]
+collection = db[getenv('MONGO_COLLECTION')]
 
 # Funcao para conectar ao banco de dados
 def conectar_banco(uri):
@@ -27,26 +34,18 @@ def conectar_banco(uri):
     
 # Funcao para obter a senha do usuário a partir do e-mail
 def get_senha(email):
-    url = "http://127.0.0.1:5000/get-password"
     try:
-        response = requests.post(url, json={"email": email})
-        response.raise_for_status()
-        data = response.json()
-        logging.info(f"Senha obtida com sucesso para o email {email}.")
-        return data.get("password", "")
+        user = collection.find_one({'email': email})
+        return user['senha']
     except Exception as e:
         logging.error(f"Erro ao obter a senha para o email {email}: {e}")
         return ""
     
 # Funcao para obter a foto de perfil do usuário a partir do e-mail
 def get_foto_perfil(email):
-    url = "http://127.0.0.1:5000/get-photo"
     try:
-        response = requests.post(url, json={"email": email})
-        response.raise_for_status()
-        data = response.json()
-        logging.info(f"Foto de perfil obtida com sucesso para o email {email}.")
-        return data.get("url", "")
+        user = collection.find_one({'email': email})
+        return user['urlFoto']
     except Exception as e:
         logging.error(f"Erro ao obter a foto de perfil para o email {email}: {e}")
         return ""
@@ -302,7 +301,6 @@ def sync_pagamento(cursor_db1, cursor_db2, connection_db1, connection_db2):
 
 # Funcao principal
 def main():
-    load_dotenv()
 
     db1_uri = getenv('URI_BANCO_1')
     db2_uri = getenv('URI_BANCO_2')
