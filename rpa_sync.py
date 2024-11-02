@@ -6,7 +6,7 @@ from os import getenv
 from dotenv import load_dotenv
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
+from random import randint
 # Configuracao do logging
 logging.basicConfig(
     filename='rpa_log.log',
@@ -143,13 +143,15 @@ def sync_universitario(cursor_db1, cursor_db2, connection_db1, connection_db2):
                 senha = get_senha(email)
                 foto_perfil = get_foto_perfil(email)
                 plano = '1' if plano_id else '0'
+                
+                username = f'{nome}{randint(10000, 99999)}'
 
                 cursor_db1.execute("""
                     INSERT INTO Universitario 
                     (uId, cDne, cNome, cUsername, cEmail, cSenha, dDtNascimento, cGenero,
                      cMunicipio, cPrefixo, cTel, cPlano, cFotoPerfil, cDescricao, cNmFaculdade)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-                """, (uid, dne, nome, nome, email, senha, dt_nascimento, genero, municipio, prefixo, telefone,
+                """, (uid, dne, nome, username, email, senha, dt_nascimento, genero, municipio, prefixo, telefone,
                       plano, foto_perfil, bio, universidade))
                 logging.info(f"Novo registro de universitario com UUID {uid} inserido no Banco 1.")
 
@@ -201,12 +203,14 @@ def sync_anunciante(cursor_db1, cursor_db2, connection_db1, connection_db2):
                 foto_perfil = get_foto_perfil(email)
                 plano = '1' if plano_id else '0'
 
+                username = f'{nome}{randint(10000, 99999)}'
+
                 cursor_db1.execute("""
                     INSERT INTO Anunciante 
                     (uId, cNome, cUsername, cEmail, cSenha, dDtNascimento, cGenero,
                      cMunicipio, cPrefixo, cTel, cPlano, cFotoPerfil, cDescricao)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-                """, (uid, nome, nome, email, senha, dt_nascimento, genero, municipio, prefixo, telefone,
+                """, (uid, nome, username, email, senha, dt_nascimento, genero, municipio, prefixo, telefone,
                       plano, foto_perfil, bio))
                 logging.info(f"Novo registro de anunciante com UUID {uid} inserido no Banco 1.")
 
