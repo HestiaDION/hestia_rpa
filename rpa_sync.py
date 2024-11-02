@@ -68,6 +68,9 @@ def sync_plano(cursor_db1, cursor_db2, connection_db2):
                 print(f"Novo registro do plano com UUID {plano_id} inserido no Banco 2.")
 
         connection_db2.commit()
+
+        print('Sincronização de plano finalizada.')
+
     except Exception as e:
         connection_db2.rollback()
         print(f"Erro ao sincronizar tabela Plano: {e}")
@@ -100,6 +103,9 @@ def sync_plano_vantagens(cursor_db1, cursor_db2, connection_db2):
                 print(f"Novo registro da vantagem com UUID {vantagem_id} inserido no Banco 2.")
 
         connection_db2.commit()
+
+        print('Sincronização de plano_vantagens finalizada.')
+
     except Exception as e:
         connection_db2.rollback()
         print(f"Erro ao sincronizar tabela Plano_vantagens: {e}")
@@ -178,6 +184,8 @@ def sync_universitario(cursor_db1, cursor_db2, connection_db1, connection_db2):
         connection_db1.commit()
         connection_db2.commit()
 
+        print('Sincronização de universitário finalizada.')
+
     except Exception as e:
         connection_db1.rollback()
         connection_db2.rollback()
@@ -253,6 +261,7 @@ def sync_anunciante(cursor_db1, cursor_db2, connection_db1, connection_db2):
         connection_db1.commit()
         connection_db2.commit()
 
+        print('Sincronização de anunciante finalizada.')
 
     except Exception as e:
         connection_db1.rollback()
@@ -325,11 +334,11 @@ def sync_pagamento(cursor_db1, cursor_db2, connection_db1, connection_db2):
         # Confirma as alterações em ambos os bancos
         connection_db1.commit()
         connection_db2.commit()
-
-
+        print('Sincronização de pagamento finalizada.')
     except Exception as e:
         connection_db1.rollback()
         connection_db2.rollback()
+        
         print(f"Erro ao sincronizar tabela Pagamento: {e}")
 
 # Função principal
